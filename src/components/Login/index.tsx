@@ -12,6 +12,8 @@ const Centered = styled("div", {
   alignItems: "center",
   height: "100%",
   marginTop: "20px",
+  marginLeft: "20px",
+  marginRight: "20px",
 });
 
 class Login extends React.Component<any> {

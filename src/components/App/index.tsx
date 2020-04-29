@@ -1,20 +1,36 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Client as Styletron } from "styletron-engine-atomic";
 import { Provider as StyletronProvider } from "styletron-react";
 import { LightTheme, BaseProvider } from "baseui";
-import * as ROUTES from '../../routes/routes';
+import * as ROUTES from "../../routes/routes";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import Login from "../Login";
 import Home from "../Home";
 import Logout from "../Logout";
 import { withFirebaseAuthentication } from "../Firebase";
+import { Unstable_AppNavBar as AppNavBar } from "baseui/app-nav-bar";
+import { LOGGED_NAV, GUEST_NAV } from "../../routes/navigation";
 
 const engine = new Styletron();
 
-const App = () => (
+type AppProps = {
+  sessionStore: any,
+}
+
+const App: FunctionComponent<AppProps> = ({ sessionStore }) => (
   <StyletronProvider value={engine}>
     <BaseProvider theme={LightTheme}>
       <Router>
+        <AppNavBar
+          appDisplayName="Archeos"
+          mainNav={sessionStore.authUser.email ? LOGGED_NAV : GUEST_NAV}
+          onNavItemSelect={() => {}}
+          userNav={[]}
+          username="Archeos"
+          usernameSubtitle="1.0"
+          userImgUrl=""
+        />
+
         <Route exact path={ROUTES.HOME} component={Home} />
         <Route path={ROUTES.LOGIN} component={Login} />
         <Route path={ROUTES.LOGOUT} component={Logout} />

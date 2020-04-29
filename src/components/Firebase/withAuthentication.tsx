@@ -1,10 +1,11 @@
 import React from "react";
 import { withFirebase } from "./withFirebase";
-import { inject } from "mobx-react";
+import { inject, observer } from "mobx-react";
 
 export const withFirebaseAuthentication = (Component: any) => {
   
   @inject("sessionStore")
+  @observer
   class WithFirebaseAuthentication extends React.Component<any, any> {
     authListener: any;
 
