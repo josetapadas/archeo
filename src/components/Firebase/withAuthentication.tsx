@@ -2,9 +2,9 @@ import React from "react";
 import { withFirebase } from "./withFirebase";
 import { inject } from "mobx-react";
 
-const FirebaseAuthenticationContext = React.createContext<any | null>(null);
-
 export const withFirebaseAuthentication = (Component: any) => {
+  
+  @inject("sessionStore")
   class WithFirebaseAuthentication extends React.Component<any, any> {
     authListener: any;
 
@@ -16,10 +16,6 @@ export const withFirebaseAuthentication = (Component: any) => {
       props.sessionStore.setAuthUser(
         JSON.parse(localStorage.getItem("authUser") || "{}")
       );
-
-      this.state = {
-        authUser: null,
-      };
     }
 
     componentDidMount() {
@@ -41,15 +37,11 @@ export const withFirebaseAuthentication = (Component: any) => {
     }
 
     render() {
-      return (
-        <FirebaseAuthenticationContext.Provider value={this.state.authUser}>
-          <Component {...this.props} />
-        </FirebaseAuthenticationContext.Provider>
-      );
+      return <Component {...this.props} />;
     }
   }
 
-  return inject("sessionStore")(withFirebase(WithFirebaseAuthentication));
+  return withFirebase(WithFirebaseAuthentication);
 };
 
 export default withFirebaseAuthentication;

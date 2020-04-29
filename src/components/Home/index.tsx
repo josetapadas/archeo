@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
-import { inject, observer } from "mobx-react";
 import { SessionStoreType } from "../../stores/sessionStore";
+import withAuthorization from "../Firebase/withAuthorization";
 
 type HomeProps = {
   sessionStore: SessionStoreType;
@@ -9,8 +9,8 @@ type HomeProps = {
 const Home: FunctionComponent<HomeProps> = ({ sessionStore }) => (
   <div>
     Welcome{" "}
-    {sessionStore.authUser ? sessionStore.authUser.displayName : "stranger"} !
+    {JSON.stringify(sessionStore.authUser)} !
   </div>
 );
 
-export default inject("sessionStore")(observer(Home));
+export default withAuthorization(Home);

@@ -7,6 +7,8 @@ import Firebase, { FirebaseContext } from "./components/Firebase";
 import { Provider as MobxProvider } from "mobx-react";
 import rootStore from "./stores";
 
+import 'mobx-react-lite/batchingForReactDom'
+
 ReactDOM.render(
   <React.StrictMode>
     <MobxProvider {...rootStore}>
