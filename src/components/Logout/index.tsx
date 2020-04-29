@@ -1,5 +1,5 @@
 import React from "react";
-import { withFirebase } from "../Firebase/context";
+import { withFirebase } from "../Firebase";
 import { styled } from "baseui";
 import { Card, StyledBody } from "baseui/card";
 
