@@ -1,5 +1,16 @@
-import React from 'react';
+import React, { FunctionComponent } from "react";
+import { inject, observer } from "mobx-react";
+import { SessionStoreType } from "../../stores/sessionStore";
 
-const Home = () => <div>HOME</div>;
+type HomeProps = {
+  sessionStore: SessionStoreType;
+};
 
-export default Home;
+const Home: FunctionComponent<HomeProps> = ({ sessionStore }) => (
+  <div>
+    Welcome{" "}
+    {sessionStore.authUser ? sessionStore.authUser.displayName : "stranger"} !
+  </div>
+);
+
+export default inject("sessionStore")(observer(Home));
