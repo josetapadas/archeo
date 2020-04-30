@@ -12,7 +12,6 @@ import { Show, Delete } from "baseui/icon";
 
 import {
   StringColumn,
-  DatetimeColumn,
   Unstable_StatefulDataTable as DataTable,
   RowActionT,
 } from "baseui/data-table";

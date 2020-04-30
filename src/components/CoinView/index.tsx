@@ -1,13 +1,12 @@
 import React from "react";
-import { withFirebase } from "../Firebase";
 import { styled } from "baseui";
 import { Card, StyledBody } from "baseui/card";
-import { useParams, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import withAuthorization from "../Firebase/withAuthorization";
 import { CoinsStoreType, CoinsObject } from "../../stores/coinsStore";
 import { inject, observer } from "mobx-react";
 
-import { H1, ParagraphMedium, LabelMedium } from "baseui/typography";
+import { H1, ParagraphMedium } from "baseui/typography";
 import { Button } from "baseui/button";
 import * as ROUTES from '../../routes/routes';
 import CoinMap from "../CoinMap";
