@@ -12,10 +12,12 @@ var config = {
 
 class Firebase {
   auth: firebase.auth.Auth;
+  db: firebase.database.Database;
 
   constructor() {
     firebase.initializeApp(config);
     this.auth = firebase.auth();
+    this.db = firebase.database();
   }
 
   logout = () => this.auth.signOut();
@@ -30,6 +32,10 @@ class Firebase {
       console.log("Error login in: ", JSON.stringify(error));
     }
   };
+
+  coins = () => this.db.ref('coins');
+  empires = () => this.db.ref('empires');
+  locations = () => this.db.ref('locations');
 }
 
 export default Firebase;
