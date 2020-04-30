@@ -7,13 +7,14 @@ import { inject, observer } from "mobx-react";
 import { styled } from "baseui";
 import { H1 } from "baseui/typography";
 
-import styles from './Home.module.css';
+import styles from "./Home.module.css";
+import { Show, Delete } from "baseui/icon";
 
 import {
   StringColumn,
   DatetimeColumn,
-  NumericalColumn,
   Unstable_StatefulDataTable as DataTable,
+  RowActionT,
 } from "baseui/data-table";
 
 const Centered = styled("div", {
@@ -48,7 +49,7 @@ class Home extends React.Component<HomeProps, any> {
     StringColumn({
       title: "Nome",
       lineClamp: 3,
-      mapDataToValue: (data: any) => data.name
+      mapDataToValue: (data: any) => data.name,
     }),
     StringColumn({
       title: "Descrição",
@@ -58,11 +59,11 @@ class Home extends React.Component<HomeProps, any> {
     }),
     StringColumn({
       title: "Era",
-      mapDataToValue: (data: any) => data.empire,
+      mapDataToValue: (data: any) => data.empire.name,
     }),
     StringColumn({
       title: "Local",
-      mapDataToValue: (data: any) => data.location,
+      mapDataToValue: (data: any) => data.location.name,
     }),
     DatetimeColumn({
       title: "Data",
@@ -70,29 +71,58 @@ class Home extends React.Component<HomeProps, any> {
     }),
   ];
 
+  rowActions: RowActionT[] = [
+    {
+      label: "Detalhes",
+      onClick: ({ row }: any) => console.log(row),
+      renderIcon: Show,
+    },
+    {
+      label: "Remover",
+      onClick: ({ row }: any) => console.log(row),
+      renderIcon: Delete,
+    },
+  ];
+
   async componentDidMount() {
-    if (!this.props.coinsStore.coins || this.props.coinsStore.coins.length === 0) {
+    if (
+      !this.props.coinsStore.coins ||
+      this.props.coinsStore.coins.length === 0
+    ) {
       this.setState({ loading: true });
     }
 
     const coinsSnapshot = await this.props.firebase.coins().once("value");
     const coins = coinsSnapshot.val();
 
-    const composedCoins = await Promise.all(coins.map(async (coin: CoinsObject) => {
-      const empireSnapshot = await this.props.firebase.empires().child(coin.empire).once("value");
-      const currentEmpire = empireSnapshot.val();
-      
-      const locationSnapshot = await this.props.firebase.locations().child(coin.location).once("value");
-      const currentLocation = locationSnapshot.val();
+    const composedCoins = await Promise.all(
+      coins.map(async (coin: CoinsObject) => {
+        const empireSnapshot = await this.props.firebase
+          .empires()
+          .child(coin.empire)
+          .once("value");
+        const currentEmpire = empireSnapshot.val();
 
-      return {
-        ...coin,
-        empire: currentEmpire.name,
-        location: currentLocation.name,
-      }
-    }));
+        const locationSnapshot = await this.props.firebase
+          .locations()
+          .child(coin.location)
+          .once("value");
+        const currentLocation = locationSnapshot.val();
 
-    console.log("composedCoins", composedCoins)
+        const positionSnapshot = await this.props.firebase
+          .positions()
+          .child(coin.position)
+          .once("value");
+        const currentPosition = positionSnapshot.val();
+
+        return {
+          ...coin,
+          empire: currentEmpire,
+          location: currentLocation,
+          position: currentPosition,
+        };
+      })
+    );
 
     this.props.coinsStore.setCoins(composedCoins);
     this.setState({ loading: false });
@@ -106,13 +136,18 @@ class Home extends React.Component<HomeProps, any> {
     const coins = this.props.coinsStore.coinsList;
     const { loading } = this.state;
 
-    if(loading || coins.length === 0) return <div>loading</div>;
+    if (loading || coins.length === 0) return <div>loading</div>;
 
     return (
       <Centered>
         <H1>Lista de Moedas</H1>
         <div className={styles.dataTable}>
-          <DataTable columns={this.columns} rows={coins} rowHeight={78}/>
+          <DataTable
+            columns={this.columns}
+            rows={coins}
+            rowHeight={78}
+            rowActions={this.rowActions}
+          />
         </div>
       </Centered>
     );

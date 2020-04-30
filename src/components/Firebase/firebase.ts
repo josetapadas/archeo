@@ -36,6 +36,7 @@ class Firebase {
   coins = () => this.db.ref('coins');
   empires = () => this.db.ref('empires');
   locations = () => this.db.ref('locations');
+  positions = () => this.db.ref('positions');
 }
 
 export default Firebase;
