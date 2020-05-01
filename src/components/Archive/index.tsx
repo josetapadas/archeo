@@ -1,34 +1,43 @@
 import React from "react";
-import { styled } from "baseui";
-import { Card, StyledBody } from "baseui/card";
-import { withRouter } from "react-router-dom";
-import withAuthorization from "../Firebase/withAuthorization";
+import { SessionStoreType } from "../../stores/sessionStore";
 import { CoinsStoreType, CoinsObject } from "../../stores/coinsStore";
-import { inject, observer } from "mobx-react";
 
-import { H1, ParagraphMedium } from "baseui/typography";
-import { Button } from "baseui/button";
-import * as ROUTES from '../../routes/routes';
-import CoinMap from "../CoinMap";
+import withAuthorization from "../Firebase/withAuthorization";
+import { inject, observer } from "mobx-react";
+import { styled } from "baseui";
+import { H1 } from "baseui/typography";
+
+import styles from "./Archive.module.css";
+import { Show, Delete } from "baseui/icon";
+
+import {
+  StringColumn,
+  Unstable_StatefulDataTable as DataTable,
+  RowActionT,
+} from "baseui/data-table";
+import { withRouter } from "react-router-dom";
+import * as ROUTES from "../../routes/routes";
 
 const Centered = styled("div", {
   display: "flex",
   justifyContent: "center",
+  alignItems: "center",
   height: "100%",
   marginTop: "20px",
   marginLeft: "20px",
   marginRight: "20px",
+  flexDirection: "column",
 });
 
-type CoinViewProps = {
+type ArchiveProps = {
+  sessionStore: SessionStoreType;
   firebase: any;
-  match: any;
   coinsStore: CoinsStoreType;
 };
 
 @inject("coinsStore")
 @observer
-class CoinView extends React.Component<any, any> {
+class Archive extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
 
@@ -36,6 +45,41 @@ class CoinView extends React.Component<any, any> {
       loading: false,
     };
   }
+
+  columns = [
+    StringColumn({
+      title: "Nome",
+      lineClamp: 3,
+      mapDataToValue: (data: any) => data.name,
+    }),
+    StringColumn({
+      title: "Descrição",
+      maxWidth: 250,
+      lineClamp: 3,
+      mapDataToValue: (data: any) => data.description,
+    }),
+    StringColumn({
+      title: "Era",
+      mapDataToValue: (data: any) => data.empire.name,
+    }),
+    StringColumn({
+      title: "Local",
+      mapDataToValue: (data: any) => data.location.name,
+    })
+  ];
+
+  rowActions: RowActionT[] = [
+    {
+      label: "Detalhes",
+      onClick: ({ row }: any) => this.props.history.push(`${ROUTES.COINS}/${row.id}`),
+      renderIcon: Show,
+    },
+    {
+      label: "Remover",
+      onClick: ({ row }: any) => console.log(row),
+      renderIcon: Delete,
+    },
+  ];
 
   async componentDidMount() {
     if (
@@ -91,45 +135,23 @@ class CoinView extends React.Component<any, any> {
   render() {
     const coins = this.props.coinsStore.coinsList;
     const { loading } = this.state;
-    const currentId = this.props.match.params.id;
 
-    if (!currentId) return <div>Item não encontrado.</div>;
     if (loading || coins.length === 0) return <div>loading</div>;
 
-    const currentCoin = this.props.coinsStore.coinsList.find(
-      (coin: any) => coin.id === currentId
-    ).data;
-    console.log("currentCoin", currentCoin);
     return (
       <Centered>
-        <Card>
-          <StyledBody>
-            <H1>{currentCoin.name}</H1>
-            <ParagraphMedium>{currentCoin.description}</ParagraphMedium>
-            <div>
-              <ul>
-                <li>
-                  <b>Era:</b>
-                  <span>{" " + currentCoin.empire.name}</span>
-                </li>
-                <li>
-                  <b>Localização:</b>
-                  <span>{" " + currentCoin.location.name}</span>
-                </li>
-              </ul>
-              <CoinMap lat={currentCoin.position.lat} long={currentCoin.position.long} name={currentCoin.name}/>
-            </div>
-            <Button
-              onClick={() => this.props.history.push(ROUTES.HOME)}
-              overrides={{ BaseButton: { style: { width: "100%" } } }}
-            >
-              Voltar
-            </Button>
-          </StyledBody>
-        </Card>
+        <H1>Arquivo</H1>
+        <div className={styles.dataTable}>
+          <DataTable
+            columns={this.columns}
+            rows={coins}
+            rowHeight={78}
+            rowActions={this.rowActions}
+          />
+        </div>
       </Centered>
     );
   }
 }
 
-export default withAuthorization(withRouter(CoinView));
+export default withAuthorization(withRouter(Archive));

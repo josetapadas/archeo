@@ -1,0 +1,11 @@
+.dataTable {
+    height: 400px;
+    width: 693px;
+}
+
+@media only screen and (max-width: 480px) {
+    .dataTable {
+        height: 400px;
+        width: 300px;
+    }
+}

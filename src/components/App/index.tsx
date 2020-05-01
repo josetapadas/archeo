@@ -11,6 +11,7 @@ import { withFirebaseAuthentication } from "../Firebase";
 import { Unstable_AppNavBar as AppNavBar } from "baseui/app-nav-bar";
 import { LOGGED_NAV, GUEST_NAV } from "../../routes/navigation";
 import CoinView from "../CoinView";
+import Archive from "../Archive";
 
 const engine = new Styletron();
 
@@ -35,6 +36,7 @@ const App: FunctionComponent<AppProps> = ({ sessionStore }) => (
         <Route exact path={ROUTES.HOME} component={Home} />
         <Route path={ROUTES.LOGIN} component={Login} />
         <Route path={ROUTES.LOGOUT} component={Logout} />
+        <Route path={ROUTES.ARCHIVE} component={Archive} />
         <Route path={`${ROUTES.COINS}/:id`} component={CoinView} />
       </Router>
     </BaseProvider>
