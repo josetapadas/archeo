@@ -7,22 +7,11 @@ import { CoinsStoreType } from "../../stores/coinsStore";
 import { inject, observer } from "mobx-react";
 import { H1, ParagraphMedium } from "baseui/typography";
 import { Button } from "baseui/button";
-import * as ROUTES from '../../routes/routes';
+import * as ROUTES from "../../routes/routes";
 
-const Centered = styled("div", {
-  display: "flex",
-  justifyContent: "center",
-  height: "100%",
-  marginTop: "20px",
-  marginLeft: "20px",
-  marginRight: "20px",
+const Container = styled("div", {
+  margin: "20px",
 });
-
-type CoinViewProps = {
-  firebase: any;
-  match: any;
-  coinsStore: CoinsStoreType;
-};
 
 @inject("coinsStore")
 @observer
@@ -98,32 +87,28 @@ class CoinView extends React.Component<any, any> {
       (coin: any) => coin.id === currentId
     ).data;
     return (
-      <Centered>
-        <Card>
-          <StyledBody>
-            <H1>{currentCoin.name}</H1>
-            <ParagraphMedium>{currentCoin.description}</ParagraphMedium>
-            <div>
-              <ul>
-                <li>
-                  <b>Era:</b>
-                  <span>{" " + currentCoin.empire.name}</span>
-                </li>
-                <li>
-                  <b>Localização:</b>
-                  <span>{" " + currentCoin.location.name}</span>
-                </li>
-              </ul>
-            </div>
-            <Button
-              onClick={() => this.props.history.push(ROUTES.HOME)}
-              overrides={{ BaseButton: { style: { width: "100%" } } }}
-            >
-              Voltar
-            </Button>
-          </StyledBody>
-        </Card>
-      </Centered>
+      <Container>
+        <H1>{currentCoin.name}</H1>
+        <ParagraphMedium>{currentCoin.description}</ParagraphMedium>
+        <div>
+          <ul>
+            <li>
+              <b>Era:</b>
+              <span>{" " + currentCoin.empire.name}</span>
+            </li>
+            <li>
+              <b>Localização:</b>
+              <span>{" " + currentCoin.location.name}</span>
+            </li>
+          </ul>
+        </div>
+        <Button
+          onClick={() => this.props.history.push(ROUTES.HOME)}
+          overrides={{ BaseButton: { style: { width: "100%" } } }}
+        >
+          Voltar
+        </Button>
+      </Container>
     );
   }
 }
