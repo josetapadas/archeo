@@ -3,13 +3,11 @@ import { styled } from "baseui";
 import { Card, StyledBody } from "baseui/card";
 import { withRouter } from "react-router-dom";
 import withAuthorization from "../Firebase/withAuthorization";
-import { CoinsStoreType, CoinsObject } from "../../stores/coinsStore";
+import { CoinsStoreType } from "../../stores/coinsStore";
 import { inject, observer } from "mobx-react";
-
 import { H1, ParagraphMedium } from "baseui/typography";
 import { Button } from "baseui/button";
 import * as ROUTES from '../../routes/routes';
-import CoinMap from "../CoinMap";
 
 const Centered = styled("div", {
   display: "flex",
@@ -47,32 +45,32 @@ class CoinView extends React.Component<any, any> {
 
     const coinsSnapshot = await this.props.firebase.coins().once("value");
     const coins = coinsSnapshot.val();
+    const modifiedCoins = Object.keys(coins || {}).map((key) => ({
+      id: key,
+      data: {
+        ...coins[key],
+      },
+    }));
 
     const composedCoins = await Promise.all(
-      coins.map(async (coin: CoinsObject) => {
+      modifiedCoins.map(async (coin: any) => {
         const empireSnapshot = await this.props.firebase
           .empires()
-          .child(coin.empire)
+          .child(coin.data.empire)
           .once("value");
         const currentEmpire = empireSnapshot.val();
 
         const locationSnapshot = await this.props.firebase
           .locations()
-          .child(coin.location)
+          .child(coin.data.location)
           .once("value");
         const currentLocation = locationSnapshot.val();
 
-        const positionSnapshot = await this.props.firebase
-          .positions()
-          .child(coin.position)
-          .once("value");
-        const currentPosition = positionSnapshot.val();
-
         return {
-          ...coin,
+          ...coin.data,
+          id: coin.id,
           empire: currentEmpire,
           location: currentLocation,
-          position: currentPosition,
         };
       })
     );
@@ -99,7 +97,6 @@ class CoinView extends React.Component<any, any> {
     const currentCoin = this.props.coinsStore.coinsList.find(
       (coin: any) => coin.id === currentId
     ).data;
-    console.log("currentCoin", currentCoin);
     return (
       <Centered>
         <Card>
@@ -117,7 +114,6 @@ class CoinView extends React.Component<any, any> {
                   <span>{" " + currentCoin.location.name}</span>
                 </li>
               </ul>
-              <CoinMap lat={currentCoin.position.lat} long={currentCoin.position.long} name={currentCoin.name}/>
             </div>
             <Button
               onClick={() => this.props.history.push(ROUTES.HOME)}

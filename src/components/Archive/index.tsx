@@ -1,22 +1,20 @@
 import React from "react";
 import { SessionStoreType } from "../../stores/sessionStore";
-import { CoinsStoreType, CoinsObject } from "../../stores/coinsStore";
-
+import { CoinsStoreType } from "../../stores/coinsStore";
+import { Button } from "baseui/button";
 import withAuthorization from "../Firebase/withAuthorization";
 import { inject, observer } from "mobx-react";
 import { styled } from "baseui";
 import { H1 } from "baseui/typography";
-
 import styles from "./Archive.module.css";
 import { Show, Delete } from "baseui/icon";
-
+import { withRouter } from "react-router-dom";
+import * as ROUTES from "../../routes/routes";
 import {
   StringColumn,
   Unstable_StatefulDataTable as DataTable,
   RowActionT,
 } from "baseui/data-table";
-import { withRouter } from "react-router-dom";
-import * as ROUTES from "../../routes/routes";
 
 const Centered = styled("div", {
   display: "flex",
@@ -27,6 +25,10 @@ const Centered = styled("div", {
   marginLeft: "20px",
   marginRight: "20px",
   flexDirection: "column",
+});
+
+const Container = styled("div", {
+  margin: "20px",
 });
 
 type ArchiveProps = {
@@ -65,13 +67,14 @@ class Archive extends React.Component<any, any> {
     StringColumn({
       title: "Local",
       mapDataToValue: (data: any) => data.location.name,
-    })
+    }),
   ];
 
   rowActions: RowActionT[] = [
     {
       label: "Detalhes",
-      onClick: ({ row }: any) => this.props.history.push(`${ROUTES.COINS}/${row.id}`),
+      onClick: ({ row }: any) =>
+        this.props.history.push(`${ROUTES.COINS}/${row.id}`),
       renderIcon: Show,
     },
     {
@@ -91,32 +94,32 @@ class Archive extends React.Component<any, any> {
 
     const coinsSnapshot = await this.props.firebase.coins().once("value");
     const coins = coinsSnapshot.val();
+    const modifiedCoins = Object.keys(coins || {}).map((key) => ({
+      id: key,
+      data: {
+        ...coins[key],
+      },
+    }));
 
     const composedCoins = await Promise.all(
-      coins.map(async (coin: CoinsObject) => {
+      modifiedCoins.map(async (coin: any) => {
         const empireSnapshot = await this.props.firebase
           .empires()
-          .child(coin.empire)
+          .child(coin.data.empire)
           .once("value");
         const currentEmpire = empireSnapshot.val();
 
         const locationSnapshot = await this.props.firebase
           .locations()
-          .child(coin.location)
+          .child(coin.data.location)
           .once("value");
         const currentLocation = locationSnapshot.val();
 
-        const positionSnapshot = await this.props.firebase
-          .positions()
-          .child(coin.position)
-          .once("value");
-        const currentPosition = positionSnapshot.val();
-
         return {
-          ...coin,
+          ...coin.data,
+          id: coin.id,
           empire: currentEmpire,
           location: currentLocation,
-          position: currentPosition,
         };
       })
     );
@@ -129,7 +132,6 @@ class Archive extends React.Component<any, any> {
     this.props.firebase.coins().off();
     this.props.firebase.empires().off();
     this.props.firebase.locations().off();
-    this.props.firebase.positions().off();
   }
 
   render() {
@@ -139,17 +141,27 @@ class Archive extends React.Component<any, any> {
     if (loading || coins.length === 0) return <div>loading</div>;
 
     return (
-      <Centered>
-        <H1>Arquivo</H1>
-        <div className={styles.dataTable}>
-          <DataTable
-            columns={this.columns}
-            rows={coins}
-            rowHeight={78}
-            rowActions={this.rowActions}
-          />
-        </div>
-      </Centered>
+      <>
+        <Centered>
+          <H1>Arquivo</H1>
+          <div className={styles.dataTable}>
+            <DataTable
+              columns={this.columns}
+              rows={coins}
+              rowHeight={78}
+              rowActions={this.rowActions}
+            />
+          </div>
+        </Centered>
+        <Container>
+          <Button
+            onClick={() => this.props.history.push(ROUTES.HOME)}
+            overrides={{ BaseButton: { style: { width: "100%" } } }}
+          >
+            Voltar
+          </Button>
+        </Container>
+      </>
     );
   }
 }

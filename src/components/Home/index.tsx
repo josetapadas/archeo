@@ -27,7 +27,7 @@ class Home extends React.Component<any> {
           <StyledBody>
             <div>
               <Button
-                onClick={() => this.props.history.push(ROUTES.HOME)}
+                onClick={() => this.props.history.push(ROUTES.ADD)}
                 overrides={{ BaseButton: { style: { width: "100%" } } }}
               >
                 Adicionar moeda
