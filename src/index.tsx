@@ -7,14 +7,14 @@ import Firebase, { FirebaseContext } from "./components/Firebase";
 import { Provider as MobxProvider } from "mobx-react";
 import rootStore from "./stores";
 
+import "mobx-react-lite/batchingForReactDom";
+
 ReactDOM.render(
-  <React.StrictMode>
-    <MobxProvider {...rootStore}>
-      <FirebaseContext.Provider value={new Firebase()}>
-        <App />
-      </FirebaseContext.Provider>
-    </MobxProvider>
-  </React.StrictMode>,
+  <MobxProvider {...rootStore}>
+    <FirebaseContext.Provider value={new Firebase()}>
+      <App />
+    </FirebaseContext.Provider>
+  </MobxProvider>,
   document.getElementById("root")
 );
 
