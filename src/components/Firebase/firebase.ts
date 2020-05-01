@@ -13,11 +13,13 @@ var config = {
 class Firebase {
   auth: firebase.auth.Auth;
   db: firebase.database.Database;
+  storage: firebase.storage.Storage;
 
   constructor() {
     firebase.initializeApp(config);
     this.auth = firebase.auth();
     this.db = firebase.database();
+    this.storage = firebase.storage()
   }
 
   logout = () => this.auth.signOut();
@@ -37,6 +39,37 @@ class Firebase {
   empires = () => this.db.ref('empires');
   locations = () => this.db.ref('locations');
   positions = () => this.db.ref('positions');
+  images = () => this.storage.ref('images');
+
+  addCoin = async (coin: any) => {
+    const newKey = await this.db.ref('coins').push().key;
+    const newcoin = {
+      [String(newKey)]: coin,
+    };
+    await this.db.ref('coins').update(newcoin);
+
+    return newKey;
+  };
+
+  addEmpire = async (empire: any) => {
+    const newKey = await this.db.ref('empires').push().key;
+    const newEmpire = {
+      [String(newKey)]: empire,
+    };
+    await this.db.ref('empires').update(newEmpire);
+
+    return newKey;
+  };
+
+  addLocation = async (location: any) => {
+    const newKey = await this.db.ref('locations').push().key;
+    const newLocation = {
+      [String(newKey)]: location,
+    };
+    await this.db.ref('locations').update(newLocation);
+
+    return newKey;
+  };
 }
 
 export default Firebase;
