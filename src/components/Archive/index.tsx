@@ -139,7 +139,7 @@ class Archive extends React.Component<any, any> {
     const coins = this.props.coinsStore.coinsList;
     const { loading } = this.state;
 
-    if (loading || coins.length === 0) return <Centered><Spinner /></Centered>;
+    if (loading) return <Centered><Spinner /></Centered>;
 
     return (
       <>
