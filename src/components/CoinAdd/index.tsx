@@ -9,6 +9,11 @@ import { RadioGroup, Radio, ALIGN } from "baseui/radio";
 import { Select } from "baseui/select";
 import withAuthorization from "../Firebase/withAuthorization";
 import { inject, observer } from "mobx-react";
+import FileUploader from "react-firebase-file-uploader";
+import { Card } from "baseui/card";
+import { H1, H4 } from "baseui/typography";
+import { Spinner } from "baseui/spinner";
+
 
 const Container = styled("div", {
   margin: "20px",
@@ -19,7 +24,19 @@ type CoinAddStateType = {
   newEra: string;
   newLocation: string;
   loading: boolean;
+  saving: boolean;
 };
+
+const Centered = styled("div", {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100%",
+  marginTop: "20px",
+  marginLeft: "20px",
+  marginRight: "20px",
+  flexDirection: "column",
+});
 
 @inject("coinsStore")
 @observer
@@ -39,10 +56,13 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
           name: "",
           description: "",
         },
+        frontImage: null,
+        backImage: null,
       },
       newEra: "1",
       newLocation: "1",
       loading: false,
+      saving: false,
     };
   }
 
@@ -91,7 +111,7 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
           ...element,
         },
       },
-  }));
+    }));
 
   setEmpire = (element: object) =>
     this.setState((currentState: any) => ({
@@ -103,40 +123,59 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
           ...element,
         },
       },
-  }));
+    }));
 
   createNewCoint = async () => {
     const { value } = this.state;
     let empire = value.empire;
     let location = value.location;
 
-    if(value.createEmpire) {
+    this.setState({ saving: true });
+
+    if (value.createEmpire) {
       const newEmpire = await this.props.firebase.addEmpire(value.newEmpire);
       empire = newEmpire;
     }
 
-    if(value.createLocation) {
-      const newLocation = await this.props.firebase.addLocation(value.newLocation);
+    if (value.createLocation) {
+      const newLocation = await this.props.firebase.addLocation(
+        value.newLocation
+      );
       location = newLocation;
     }
 
     const newCoin = {
       name: value.name,
       description: value.description,
+      frontImage: value.frontImage,
+      backImage: value.backImage,
       location,
       empire,
-    }
+    };
 
     const createdCoin = await this.props.firebase.addCoin(newCoin);
+    this.setState({ saving: false });
 
-    if(createdCoin) this.props.history.push(ROUTES.ARCHIVE);
-  }
+    if (createdCoin) this.props.history.push(ROUTES.ARCHIVE);
+  };
+
+  handleUploadError = (error: any) => {
+    console.error(error);
+  };
+
+  handleUploadSuccess = async (filename: any, isBack: boolean = false) => {
+    const fileName = await this.props.firebase.storage
+      .ref("images")
+      .child(filename)
+      .getDownloadURL();
+    isBack ? this.setValue({ backImage: fileName }) : this.setValue({ frontImage: fileName });
+  };
 
   render() {
-    const { value, newEra, newLocation, loading } = this.state;
+    const { value, newEra, newLocation, loading, saving } = this.state;
     const { locationsList, empiresList } = this.props.coinsStore;
 
-    if (loading || !locationsList || !empiresList) return <div>loading...</div>;
+    if (saving || loading || !locationsList || !empiresList) return <Centered><Spinner /></Centered>;
 
     const locationOptions = locationsList.map((location: any) => ({
       id: location.id,
@@ -150,8 +189,9 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
 
     return (
       <Container>
+        <H1>Adicionar nova moeda</H1>
         <div>
-          <p>Moeda</p>
+          <H4>Moeda</H4>
           <span>Nome</span>
           <Input
             value={value.name}
@@ -167,9 +207,42 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
             }
           />
         </div>
-
         <div>
-          <p>Era</p>
+          <Card>
+            <p>Foto frontal</p>
+            {this.state.value.frontImage ? (
+              <img src={this.state.value.frontImage} alt="frontal" style={{ maxWidth: "20%" }}/>
+            ) : (
+              <FileUploader
+                accept="image/*"
+                name="frontImage"
+                randomizeFilename
+                storageRef={this.props.firebase.storage.ref("images")}
+                onUploadSuccess={(filename: any) => this.handleUploadSuccess(filename, false)}
+                onUploadError={this.handleUploadError}
+              />
+            )}
+          </Card>
+        </div>
+        <div>
+          <Card>
+            <p>Foto traseira</p>
+            {this.state.value.backImage ? (
+              <img src={this.state.value.backImage} alt="back" style={{ maxWidth: "20%" }}/>
+            ) : (
+              <FileUploader
+                accept="image/*"
+                name="backImage"
+                randomizeFilename
+                storageRef={this.props.firebase.storage.ref("images")}
+                onUploadSuccess={(filename: any) => this.handleUploadSuccess(filename, true)}
+                onUploadError={this.handleUploadError}
+              />
+            )}
+          </Card>
+        </div>
+        <div>
+          <H4>Era</H4>
           <RadioGroup
             value={newEra}
             onChange={(e) => {
@@ -187,9 +260,7 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
               <span>Nome</span>
               <Input
                 value={value.newEmpire.name}
-                onChange={(e: any) =>
-                  this.setEmpire({ name: e.target.value })
-                }
+                onChange={(e: any) => this.setEmpire({ name: e.target.value })}
               />
               <span>Descrição</span>
               <Textarea
@@ -213,7 +284,7 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
         </div>
 
         <div>
-          <p>Local</p>
+          <H4>Local</H4>
           <RadioGroup
             value={newLocation}
             onChange={(e) => {
@@ -273,7 +344,6 @@ class CoinAdd extends React.Component<any, CoinAddStateType> {
           </Button>
         </Container>
       </Container>
-      
     );
   }
 }

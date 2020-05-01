@@ -10,6 +10,7 @@ import styles from "./Archive.module.css";
 import { Show, Delete } from "baseui/icon";
 import { withRouter } from "react-router-dom";
 import * as ROUTES from "../../routes/routes";
+import { Spinner } from "baseui/spinner";
 import {
   StringColumn,
   Unstable_StatefulDataTable as DataTable,
@@ -138,7 +139,7 @@ class Archive extends React.Component<any, any> {
     const coins = this.props.coinsStore.coinsList;
     const { loading } = this.state;
 
-    if (loading || coins.length === 0) return <div>loading</div>;
+    if (loading || coins.length === 0) return <Centered><Spinner /></Centered>;
 
     return (
       <>
